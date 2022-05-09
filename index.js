@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require('cors');
+const ObjectId = require('mongodb').ObjectId;
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
@@ -24,13 +25,32 @@ async function run(){
         app.get('/items/:id', async(req, res)=>{
             const id = req.params.id;
             const query = {_id: ObjectId(id)};
-            const result = await serviceCollection.findOne(query);
+            const result = await booksCollection.findOne(query);
             res.send(result);
         })
         app.post('/item', async(req, res)=>{
             const newItem = req.body;
             const books = await booksCollection.insertOne(newItem);
             res.send({books: req.body})
+        })
+        app.put('/item/:id', async(req, res)=>{
+            const id = req.params.id;
+            const updatedItem = req.body;
+            const filter = {_id: ObjectId(id)};
+            const options = { upsert: true};
+            const updateDoc = {
+                $set: {
+                    name: updatedItem.name,
+                    email: updatedItem.price
+                }
+            }
+            const result = await booksCollection.updateOne(filter, updateDoc, options)
+        })
+        app.delete('/item/:id', async(req, res)=>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)}
+            const result = await booksCollection.deleteOne(query);
+            res.send(result)
         })
     }
     finally{
