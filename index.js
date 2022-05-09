@@ -8,8 +8,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
-const uri = "mongodb+srv://himashraybb:f3BrjyXuUIgGZWmX@cluster0.01i8p.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.01i8p.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
 async function run(){
@@ -22,15 +21,15 @@ async function run(){
             const books = await cursor.toArray();
             res.send(books)
         })
-        app.get('/users', async(req, res)=>{
-            const query = {};
-            const cursor = booksCollection.find(query);
-            const books = await cursor.toArray();
-            res.send(books)
+        app.get('/items/:id', async(req, res)=>{
+            const id = req.params.id;
+            const query = {_id: ObjectId(id)};
+            const result = await serviceCollection.findOne(query);
+            res.send(result);
         })
-        app.post('/user', async(req, res)=>{
-            const newUser = req.body;
-            const books = await booksCollection.insertOne(newUser);
+        app.post('/item', async(req, res)=>{
+            const newItem = req.body;
+            const books = await booksCollection.insertOne(newItem);
             res.send({books: req.body})
         })
     }
